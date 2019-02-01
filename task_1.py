@@ -1,7 +1,30 @@
-# 1. Проанализировать скорость и сложность одного любого алгоритма, разработанных в рамках домашнего задания первых трех уроков.
+# 1. Подсчитать, сколько было выделено памяти под переменные в ранее разработанных программах
+# в рамках первых трех уроков.
+# Проанализировать результат и определить программы с наиболее эффективным использованием памяти..
 #
 # В диапазоне натуральных чисел от 2 до 99 определить, сколько из них кратны любому из чисел в диапазоне от 2 до 9.
-import cProfile
+import platform
+import sys
+
+memory_size = 0
+
+
+def add_to_memory_size(var):
+    global memory_size
+
+    if isinstance(var, dict):
+        memory_size += sys.getsizeof(var)
+        for i in var:
+            memory_size += sys.getsizeof(i)
+    elif isinstance(var, list):  # только для приема списка переменных, в фукнциях не используется
+        for i in var:
+            add_to_memory_size(i)
+    else:
+        memory_size += sys.getsizeof(var)
+
+
+# *********
+
 
 RANGE_START = 2
 
@@ -17,31 +40,10 @@ def func1(range_stop):
             if num % i == 0:
                 nums_data[i] += 1
 
+    add_to_memory_size([RANGE_START, range_stop, nums_data, nums_data.keys(), i, num])
+
     return nums_data
 
-
-# 100 loops, best of 5: 53.6 usec per loop - 99
-# 100 loops, best of 5: 551 usec per loop - 999
-# 100 loops, best of 5: 5.75 msec per loop - 9999
-
-# cProfile.run('func1(99)')
-#
-#    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-#         1    0.000    0.000    0.000    0.000 <string>:1(<module>)
-#         1    0.000    0.000    0.000    0.000 task_1.py:7(func1)
-#         1    0.000    0.000    0.000    0.000 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-#        98    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}
-
-# cProfile.run('func1(999)')
-#    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-#         1    0.000    0.000    0.001    0.001 <string>:1(<module>)
-#         1    0.001    0.001    0.001    0.001 task_1.py:7(func1)
-#         1    0.000    0.000    0.001    0.001 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-#       998    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}
-
-# print(func1(99))
 
 # Способ 2. Целочисленное деление
 def func2(range_stop):
@@ -49,28 +51,9 @@ def func2(range_stop):
     for i in range(2, 10):
         nums_data[i] = range_stop // i
 
+    add_to_memory_size([range_stop, nums_data, i])
+
     return nums_data
-
-
-# 100 loops, best of 5: 901 nsec per loop - 99
-# 100 loops, best of 5: 950 nsec per loop - 999
-# 100 loops, best of 5: 965 nsec per loop - 9999
-# 100 loops, best of 5: 966 nsec per loop - 99999
-
-# cProfile.run('func2(99)')
-#
-#    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-#         1    0.000    0.000    0.000    0.000 <string>:1(<module>)
-#         1    0.000    0.000    0.000    0.000 task_1.py:45(func2)
-#         1    0.000    0.000    0.000    0.000 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-
-# cProfile.run('func2(999)')
-#    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-#         1    0.000    0.000    0.000    0.000 <string>:1(<module>)
-#         1    0.000    0.000    0.000    0.000 task_1.py:45(func2)
-#         1    0.000    0.000    0.000    0.000 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
 
 
 # Способ 3. Пройти диапазон для каждого числа 2-9
@@ -83,27 +66,28 @@ def func3(range_stop):
                 nn += 1
         nums_data[i] = nn
 
+    add_to_memory_size([RANGE_START, range_stop, nums_data, i, nn, num])
+
     return nums_data
 
-#100 loops, best of 5: 34.8 usec per loop - 99
-#100 loops, best of 5: 397 usec per loop - 999
-#100 loops, best of 5: 4.27 msec per loop - 9999
 
-# cProfile.run('func3(99)')
-#
-#    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-#         1    0.000    0.000    0.000    0.000 <string>:1(<module>)
-#         1    0.000    0.000    0.000    0.000 task_1.py:77(func3)
-#         1    0.000    0.000    0.000    0.000 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+# print(func1(99))  # Память: 752
+# print(func2(99))  #  Память: 648
+# print(func3(99)) #  Память: 732
 
+# print(func1(999999))  # Память: 752
+# print(func2(999999))  #  Память: 648
+# print(func3(999999)) #  Память: 732
 
-# print(func1(99))
-# print(func2(99))
-# print(func3(99))
+# print(sys.version) # 3.7.0
+# print(platform.architecture()) # ('64bit', '')
 
+print(f'Память: {memory_size}')
 
 # Вывод
-# Ранее задача была решена самым ресурсоемким способом. Способ 3 быстрее способа 1 за счет отсутствия обращения к ключам словаря.
-# Самый быстрый способ - Способ 2.
-
+# Отдельно на каждую функцию можно посчитать - 136 байт, но тк функции использованы для
+# оформления решения и к алгоритму отношения не имеют в общую сумму их не включаю
+#
+# Память не растет при переборе тк использована range, которая генерирует не список а итерируемый объект,
+# Все перечисленные алгоритмы не потребляют значительного количества памяти
+# и использование памяти не увеличивается при увеличении рассматриваемого интервала
